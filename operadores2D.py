@@ -6,7 +6,8 @@ def JacobiP(x, alpha, beta, N):
     Avalia o Polinômio de Jacobi ortonormal de tipo (alpha,beta) > -1
     nos pontos x para a ordem N.
     """
-    xp = np.atleast_1d(x)
+    #xp = np.atleast_1d(x)
+    xp = np.asarray(x).flatten() # Força a virar (66,) removendo dimensões extras
     PL = np.zeros((N + 1, len(xp)))
 
     # Valores iniciais P_0(x) e P_1(x)
