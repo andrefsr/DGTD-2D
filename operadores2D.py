@@ -51,8 +51,19 @@ def JacobiGQ(alpha, beta, N):
     J = np.zeros((N + 1, N + 1))
     h1 = 2 * np.arange(N + 1) + alpha + beta
 
+
+    # Calcula o denominador
+    denom = (h1 + 2) * h1
+
+    # Trava de segurança: Se o denominador for 0, troca por um número minúsculo (1e-15)
+    # Como o numerador também será 0 (alpha e beta são 0), 0 / 1e-15 = 0 (Matematicamente correto!)
+    denom = np.where(denom == 0, 1e-15, denom)
+
+    # Preenche a diagonal
+    np.fill_diagonal(J, -0.5 * (alpha**2 - beta**2) / denom)
+
     # Diagonal principal
-    np.fill_diagonal(J, -0.5 * (alpha**2 - beta**2) / ((h1 + 2) * h1))
+    #np.fill_diagonal(J, -0.5 * (alpha**2 - beta**2) / ((h1 + 2) * h1))
     
     # Subdiagonal
     i = np.arange(1, N + 1)

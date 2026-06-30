@@ -48,8 +48,15 @@ def GradVandermonde2D(N, r, s):
     
 def Dmatrices2D(N,r,s,V):
     Vr, Vs = GradVandermonde2D(N,r,s)
-    Dr = Vr/V 
-    Ds = Vs/V
+
+    # O certo é Multiplicar pela Inversa da Vandermonde
+    invV = np.linalg.inv(V)
+
+    Dr = Vr @ invV
+    Ds = Vs @ invV
+
+    #Dr = Vr/V 
+    #Ds = Vs/V
     return Dr, Ds
 
 def Filter2D(Norder, Nc, sp, V, invV):
