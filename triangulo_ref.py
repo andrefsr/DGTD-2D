@@ -117,15 +117,3 @@ def xytors(x,y):
     s = -L2 - L3 + L1
     return r, s
 
-def Vandermonde2D(N, r, s):
-
-    V2D = np.zeros((len(r),int((N+1)*(N+2)/2)))
-
-    a, b = rstoab(r,s) 
-
-    sk = 0
-    for i in range(N+1):
-        for j in range(N - i + 1):
-            V2D[:,sk] = op2D.Simplex2DP(a,b,i,j)
-            sk += 1
-    return V2D
