@@ -23,7 +23,30 @@ def JacobiP(x, alpha, beta, N):
     # Retorna o polinômio ortonormalizado
     return P_scipy / np.sqrt(gamma_norm)
 
+def GradJacobiP(x, alpha, beta, N):
+    """
+    Avalia a derivada dos Polinômios de Jacobi Ortonormais de grau N
+    com parâmetros alpha e beta nos pontos x.
+    """
+    x = np.asarray(x, dtype=float)
+    
+    # Inicializa o vetor de derivadas com zeros
+    dP = np.zeros_like(x)
+    
+    # Se o grau for 0, o polinômio é constante, logo a derivada é 0
+    if N == 0:
+        return dP
+    else:
+        # Fator de escala derivado da relação de ortonormalidade
+        scale = np.sqrt(N * (N + alpha + beta + 1.0))
+        
+        # A derivada é proporcional ao polinômio de grau N-1 com parâmetros +1
+        dP = scale * JacobiP(x, alpha + 1.0, beta + 1.0, N - 1)
+        
+        return dP
+
 def Simplex2DP(a, b, i, j):
+    """Polinômios (P) bidimensionais (2D) avaliados no Triângulo (Simplex)"""
     #Evaluate 2D orthonormal polynomial on simplex at (a,b) of order (i,j).
 
     a = np.asarray(a, dtype=float)
