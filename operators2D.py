@@ -77,4 +77,40 @@ def Dmatrices2D(N,r,s,V):
 
     return Dr, Ds
 
+import numpy as np
+
+def Filter2D(N, Nc, s, V):
+    """
+    Constrói a Matriz de Filtro Exponencial 2D.
+    N  : Ordem máxima do polinômio
+    Nc : Modo de corte (modos abaixo de Nc não são filtrados)
+    s  : Ordem do filtro (força da atenuação, deve ser um número par, ex: 2, 4, 6...)
+    V  : Matriz de Vandermonde 2D do elemento
+    """
+    # alpha é definido com base no zero da máquina para que o último modo 
+    # seja atenuado até o limite de precisão do computador (aprox. 36.04)
+    alpha = -np.log(np.finfo(float).eps) 
+    
+    Np = int((N + 1) * (N + 2) / 2)
+    Fdiag = np.ones(Np) # Inicializa a diagonal toda com 1 (sem filtro)
+    
+    sk = 0
+    # Percorre todos os modos polinomiais no triângulo
+    for i in range(N + 1):
+        for j in range(N - i + 1):
+            n = i + j # A ordem total do modo 2D é a soma i + j
+            
+            # Se a ordem do modo ultrapassar o corte, aplica a atenuação exponencial
+            if n >= Nc:
+                Fdiag[sk] = np.exp(-alpha * ((n - Nc) / (N - Nc))**s)
+                
+            sk += 1
+            
+    # Monta a matriz diagonal Lambda
+    Lambda = np.diag(Fdiag)
+    
+    # Constrói a Matriz de Filtro F = V * Lambda * V^-1
+    F = V @ Lambda @ np.linalg.inv(V)
+    
+    return F
 
