@@ -1,4 +1,4 @@
-import main
+import Nodes
 import numpy as np
 import matplotlib.pyplot as plt
 import aux_func as aux
@@ -6,7 +6,7 @@ import aux_func as aux
 r_teste = [-1.0, 0.0, 1.0, 0.5]
 s_teste = [0.0, 0.5, 1.0, -1.0]
 
-a_res, b_res = main.rstoab(r_teste, s_teste)
+a_res, b_res = Nodes.rstoab(r_teste, s_teste)
 
 print("Vetor r original:", r_teste)
 print("Vetor s original:", s_teste)
@@ -25,7 +25,7 @@ def testar_warpfactor():
     # TESTE 1: Verificação Numérica Extrema (Casos Críticos)
     # ---------------------------------------------------------
     pontos_criticos = np.array([-1.0, 0.0, 1.0])
-    warp_critico = main.Warpfactor(N, pontos_criticos)
+    warp_critico = Nodes.Warpfactor(N, pontos_criticos)
     
     print("--- Teste Numérico ---")
     print(f"Warp em r = -1.0 : {warp_critico[0]:.15f} (Esperado: 0.0)")
@@ -41,7 +41,7 @@ def testar_warpfactor():
     # ---------------------------------------------------------
     # Cria 100 pontos de alta resolução para plotar uma curva suave
     r_alta_resolucao = np.linspace(-1, 1, 100)
-    warp_curva = main.Warpfactor(N, r_alta_resolucao)
+    warp_curva = Nodes.Warpfactor(N, r_alta_resolucao)
     
     # Plota o resultado
     plt.figure(figsize=(8, 5))
@@ -63,3 +63,37 @@ def testar_warpfactor():
 
 # Executa o teste
 testar_warpfactor()
+
+def plotar_malha_triangulo(N):
+    # 1. Calcula os nós usando as suas funções corrigidas
+    x, y = Nodes.Nodes2D(N)
+    r, s = Nodes.xytors(x, y)
+    
+    # 2. Prepara a figura
+    plt.figure(figsize=(8, 8))
+    
+    # 3. Desenha as bordas do triângulo de referência para checagem visual
+    # Conecta os pontos: (-1,-1) -> (1,-1) -> (-1,1) -> volta pro (-1,-1)
+    r_borda = [-1.0,  1.0, -1.0, -1.0]
+    s_borda = [-1.0, -1.0,  1.0, -1.0]
+    plt.plot(r_borda, s_borda, 'k--', linewidth=2, label='Fronteira do Elemento')
+    
+    # 4. Plota os nós que você calculou
+    plt.plot(r, s, 'ro', markersize=6, label=f'Nós Otimizados (N={N})')
+    
+    # 5. Ajustes estéticos cruciais
+    plt.axis('equal')  # Garante que as proporções geométricas sejam reais
+    plt.xlim(-1.2, 1.2)
+    plt.ylim(-1.2, 1.2)
+    
+    # Textos e legendas
+    plt.title(f"Distribuição Warp & Blend no Triângulo de Referência (N={N})", fontsize=14)
+    plt.xlabel("Coordenada r", fontsize=12)
+    plt.ylabel("Coordenada s", fontsize=12)
+    plt.grid(True, linestyle=':', alpha=0.7)
+    plt.legend(loc='upper right')
+    
+    plt.show()
+
+# Faça o teste! Uma ordem N=6 ou N=8 costuma ficar com um visual bem legal.
+plotar_malha_triangulo(N=15)
