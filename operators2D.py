@@ -113,20 +113,12 @@ def Filter2D(N, Nc, s, V):
     
     return F
 
-import numpy as np
-
-def Lift2D(N, r, s, V):
-    '''Compute surface to volume lift term for DG formulation'''
-    # Quando a simulação estiver rodando no loop de tempo,
-    # você vai calcular a diferença da onda entre um triângulo e seu vizinho (o fluxo na borda) e multiplicar por essa matriz LIFT.
-    # Ela automaticamente espalhará a correção do fluxo para os nós internos do triângulo
-    
-    #Constrói a matriz de índices Fmask para o triângulo de referência.
-    #Retorna uma matriz onde cada coluna contém os índices dos nós 
-    #pertencentes a uma das faces.
-
-    tol=1e-10
-
+def calcular_fmask(r, s, tol=1e-10):
+    """
+    Constrói a matriz de índices Fmask para o triângulo de referência.
+    Retorna uma matriz onde cada coluna contém os índices dos nós 
+    pertencentes a uma das faces.
+    """
     # 1. Encontra os índices (IDs) dos pontos que satisfazem a geometria da face
     # O [0] no final serve para extrair o array de dentro da tupla que o np.where retorna
     fmask1 = np.where(np.abs(s + 1.0) < tol)[0]  # Face 1: s = -1
@@ -136,7 +128,12 @@ def Lift2D(N, r, s, V):
     # 2. Agrupa as três listas como colunas em uma matriz 2D
     # O resultado será uma matriz de tamanho (Nfp, 3)
     Fmask = np.column_stack((fmask1, fmask2, fmask3))
+    
+    return Fmask
 
+def Lift2D(N, r, s, V, Fmask):
+    '''Compute surface to volume lift term for DG formulation'''
+    
     Np = ((N + 1) * (N + 2)) // 2  # Divisão inteira
     Nfp = N + 1                    # Número de nós na face (borda)
     Nfaces = 3                     # Triângulo tem 3 faces
