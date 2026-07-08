@@ -19,8 +19,6 @@ def rstoab(r, s):
     
     return a, b
 
-import numpy as np
-
 def Warpfactor(N, rout):
     # rout representa os pontos de avaliação fora/na borda
     rout = np.asarray(rout, dtype=float) 

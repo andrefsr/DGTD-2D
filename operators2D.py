@@ -167,9 +167,52 @@ def Lift2D(N, r, s, V):
     
     return LIFT
 
+def Grad2D(u, rx, sx, ry, sy, Dr, Ds):
+    '''Compute 2D gradient field of scalar u'''
+    
+    # 1. Derivadas Locais (Matriz @ Vetor)
+    ur = Dr @ u
+    us = Ds @ u
+    
+    # 2. Derivadas Globais pela Regra da Cadeia (Elemento * Elemento)
+    ux = rx * ur + sx * us
+    uy = ry * ur + sy * us
+    
+    return ux, uy
 
+def Div2D(u,v,rx,sx,ry,sy,Dr,Ds):
+    '''Compute the 2D divergence of the vectorfield (u,v)'''
 
+    ur = Dr @ u
+    us = Ds @ u
+    vr = Dr @ v
+    vs = Ds @ v
 
+    divu = rx * ur + sx * us + ry * vr + sy * vs
+
+    return divu
+
+# Definimos uz=None como padrão. Se você não enviar uz, ele fica vazio.
+def Curl2D(ux, uy, uz, rx, sx, ry, sy, Dr, Ds):
+    '''Compute 2D curl-operator in (x,y) plane'''
+
+    uxr = Dr @ ux
+    uxs = Ds @ ux
+    uyr = Dr @ uy
+    uys = Ds @ uy
+
+    vz = (rx * uyr + sx * uys) - (ry * uxr + sy * uxs)    
+    vx = None
+    vy = None
+    
+    if uz is not None:
+        uzr = Dr @ uz
+        uzs = Ds @ uz
+
+        vx =  ry * uzr + sy * uzs
+        vy = -rx * uzr - sx * uzs
+        
+    return vx, vy, vz
 
 
     
