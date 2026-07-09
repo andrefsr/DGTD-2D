@@ -109,4 +109,75 @@ def Connect2D(EToV): # ?????
                 # Primeira vez vendo essa face. Salva no mapa esperando o vizinho.
                 face_map[signature] = (k, f)
                 
-    return EToE, EToF
+    return EToE, EToF 
+
+def BuildMaps2D(x, y, Fmask, EToV, EToE, EToF, VX, VY, NODETOL=1e-10):
+    """
+    Constrói as tabelas de conectividade e contorno para a malha nodal.
+    """
+    Np, K = x.shape
+    Nfaces = 3
+    Nfp = Fmask.shape[0] // Nfaces # Nós por face
+    
+    # 1. Numera os nós de volume consecutivamente (Lido como Fortran)
+    nodeids = np.reshape(np.arange(K * Np), (Np, K), order='F')
+    
+    # Inicializa os mapas com zeros
+    vmapM = np.zeros((Nfp, Nfaces, K), dtype=int)
+    vmapP = np.zeros((Nfp, Nfaces, K), dtype=int)
+    
+    # mapM é apenas uma lista sequencial de todos os nós de face
+    mapM = np.arange(K * Nfp * Nfaces)
+    mapP = np.reshape(np.copy(mapM), (Nfp, Nfaces, K), order='F')
+    
+    # 2. Preenche vmapM (os nós internos vistos da borda)
+    Fmask_2d = np.reshape(Fmask, (Nfp, Nfaces), order='F')
+    for k1 in range(K):
+        for f1 in range(Nfaces):
+            vmapM[:, f1, k1] = nodeids[Fmask_2d[:, f1], k1]
+            
+    # 3. O Loop Principal de Conexão dos Vizinhos
+    for k1 in range(K):
+        for f1 in range(Nfaces):
+            # Encontra o vizinho k2 e a face do vizinho f2
+            k2 = EToE[k1, f1]
+            f2 = EToF[k1, f1]
+            
+            # Comprimento de referência da aresta geométrica (usando vértices globais)
+            v1 = EToV[k1, f1]
+            v2 = EToV[k1, (f1 + 1) % Nfaces] # O mod do MATLAB virou %
+            refd = np.sqrt((VX[v1] - VX[v2])**2 + (VY[v1] - VY[v2])**2)
+            
+            # IDs de volume dos nós da face atual (Minus) e da face vizinha (Plus)
+            vidM = vmapM[:, f1, k1]
+            vidP = vmapM[:, f2, k2]
+            
+            # Coordenadas físicas (x,y) desses nós
+            x1, y1 = x.flatten(order='F')[vidM], y.flatten(order='F')[vidM]
+            x2, y2 = x.flatten(order='F')[vidP], y.flatten(order='F')[vidP]
+            
+            # Cálculo da Matriz de Distância D entre todos os nós da Face 1 vs Face 2
+            # Usa broadcasting do NumPy (x1[:, None] transforma num vetor coluna)
+            D = (x1[:, None] - x2[None, :])**2 + (y1[:, None] - y2[None, :])**2
+            
+            # Encontra quais nós colidem (distância menor que a tolerância geométrica)
+            idM, idP = np.where(np.sqrt(np.abs(D)) < NODETOL * refd)
+            
+            # Preenche os mapas PLUS (com as informações de k2 e f2 achadas)
+            vmapP[idM, f1, k1] = vidP[idP]
+            # Cálculo do índice linear (cuidado: matemática de base 0 no Python)
+            mapP[idM, f1, k1] = idP + (f2 * Nfp) + (k2 * Nfaces * Nfp)
+            
+    # 4. Achata as matrizes em vetores 1D (usando ordem Fortran para manter compatibilidade)
+    vmapP = vmapP.flatten(order='F')
+    vmapM = vmapM.flatten(order='F')
+    mapP = mapP.flatten(order='F')
+    
+    # 5. Lista de Contorno (Boundary Nodes)
+    # Qualquer nó onde o Plus aponta para o próprio Minus significa que não tem vizinho!
+    mapB = np.where(vmapP == vmapM)[0]
+    vmapB = vmapM[mapB]
+    
+    return mapM, mapP, vmapM, vmapP, vmapB, mapB
+
+
