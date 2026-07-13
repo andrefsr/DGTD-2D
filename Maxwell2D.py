@@ -1,8 +1,9 @@
 import numpy as np
 import aux_func as aux
 import setup
+import operators2D as op2D
 
-def MaxwellRhs2D(Hx, Hy, Ez, malha, op2D):
+def MaxwellRhs2D(Hx, Hy, Ez, malha):
     '''Calcula o fluxo (lado direito) das equações de Maxwell 2D para o modo TM'''
     
     # 1. Achata as matrizes em 1D (ordem Fortran) para os mapas de conectividade funcionarem
@@ -49,7 +50,7 @@ def MaxwellRhs2D(Hx, Hy, Ez, malha, op2D):
     
     return rhsHx, rhsHy, rhsEz
 
-def Maxwell2D(Hx, Hy, Ez, FinalTime, malha, op2D, setup):
+def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
     '''Integrate TM-mode Maxwell's until FinalTime starting with initial conditions Hx, Hy, Ez'''
     
     # 1. Matrizes do Runge-Kutta de Baixo Armazenamento (5 estágios, 4ª ordem)
@@ -112,7 +113,7 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha, op2D, setup):
             # local_time = time + rk4c[INTRK] * dt
             
             # Chamada do RHS com todas as dependências corretas
-            rhsHx, rhsHy, rhsEz = MaxwellRhs2D(Hx, Hy, Ez, malha, op2D)
+            rhsHx, rhsHy, rhsEz = MaxwellRhs2D(Hx, Hy, Ez, malha)
             
             # Atualiza o residual
             resHx = rk4a[INTRK] * resHx + dt * rhsHx
