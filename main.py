@@ -46,3 +46,26 @@ plt.tight_layout()
 
 # 5. Mostra na tela
 plt.show()
+
+# 1. Achatamos as coordenadas globais de todos os nós de todos os triângulos
+x_nos = malha.x.flatten(order='F')
+y_nos = malha.y.flatten(order='F')
+
+# 2. Preparamos a figura
+plt.figure(figsize=(8, 8))
+plt.title(f'Distribuição dos Nós no Nodal DG (Polinômio N = {N})')
+
+# 3. Desenhamos o "aramado" (as arestas da malha) em cinza claro ao fundo
+# Note que usamos VX, VY e EToV (a malha bruta do Gmsh) para desenhar as linhas
+plt.triplot(VX, VY, EToV, color='gray', linewidth=0.8, alpha=0.5, label='Arestas dos Triângulos')
+
+# 4. Desenhamos os nós como pontinhos vermelhos por cima
+plt.plot(x_nos, y_nos, 'o', markersize=3, color='red', label='Nós de Interpolação')
+
+# 5. Formatação
+plt.xlabel('x')
+plt.ylabel('y')
+plt.axis('equal') # Garante que o quadrado não fique distorcido
+plt.legend(loc='upper right')
+
+plt.show()

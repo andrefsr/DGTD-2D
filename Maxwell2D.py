@@ -30,7 +30,7 @@ def MaxwellRhs2D(Hx, Hy, Ez, malha):
     dEz = dEz.reshape(shape_faces, order='F')
     
     # 5. Fluxos de Fronteira (Upwind)
-    alpha = 1.0
+    alpha = 0.0
     ndotdH = malha.nx * dHx + malha.ny * dHy
     
     fluxHx =  malha.ny * dEz + alpha * (ndotdH * malha.nx - dHx)
