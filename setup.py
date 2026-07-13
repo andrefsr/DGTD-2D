@@ -29,15 +29,16 @@ def StartUp2D(N,EToV,VX,VY):
     y = 0.5 * (-(r_col + s_col) * VY[va] + (1 + r_col) * VY[vb] + (1 + s_col) * VY[vc])
 
     Fmask = op2D.calcular_fmask(r,s,NODETOL)
-    Fx = x[Fmask[:],:]
-    Fy = y[Fmask[:],:]
+    fmask_flat = Fmask.flatten(order='F')
+    Fx = x[fmask_flat, :]
+    Fy = y[fmask_flat, :]
 
     LIFT = op2D.Lift2D(N,r,s,V,Fmask)
 
     rx, sx, ry, sy, J = grid.GeometricFactors2D(x,y,Dr,Ds)
 
     nx, ny, sJ = grid.Normals2D(x,y,Dr,Ds,Fmask,N)
-    Fscale = sJ/J[Fmask,:]
+    Fscale = sJ/J[fmask_flat,:]
 
     EToE, EToF = grid.Connect2D(EToV)
 

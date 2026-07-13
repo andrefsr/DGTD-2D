@@ -116,8 +116,9 @@ def BuildMaps2D(x, y, Fmask, EToV, EToE, EToF, VX, VY, NODETOL=1e-10):
     Constrói as tabelas de conectividade e contorno para a malha nodal.
     """
     Np, K = x.shape
-    Nfaces = 3
-    Nfp = Fmask.shape[0] // Nfaces # Nós por face
+    #Nfaces = 3
+    #Nfp = Fmask.shape[0] // Nfaces # Nós por face
+    Nfp, Nfaces = Fmask.shape
     
     # 1. Numera os nós de volume consecutivamente (Lido como Fortran)
     nodeids = np.reshape(np.arange(K * Np), (Np, K), order='F')

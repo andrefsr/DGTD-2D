@@ -3,10 +3,11 @@ import setup as stp
 import Maxwell2D as Max
 import operators2D as op2D
 import mesh_reader as msh
+import matplotlib.pyplot as plt
 
 ### Driver Script for solving the 2D vacuum Maxwell's equations on TM form
 
-N = 10
+N = 4
 
 VX, VY, EToV, BCTags = msh.MeshReader2D('cavidade quadrada.msh')
 
@@ -17,5 +18,31 @@ Ez = np.sin(np.pi*malha.x)*np.sin(np.pi*malha.y)
 Hx = np.zeros((malha.Np,malha.K))
 Hy = np.zeros((malha.Np,malha.K))
 
-FinalTime = 1
+FinalTime = 0.5
 Hx, Hy, Ez = Max.Maxwell2D(Hx,Hy,Ez,FinalTime,malha)
+
+
+# 1. Achata as matrizes para vetores 1D
+x_plot = malha.x.flatten(order='F')
+y_plot = malha.y.flatten(order='F')
+Ez_plot = Ez.flatten(order='F')
+
+# 2. Configura a janela do gráfico
+plt.figure(figsize=(8, 6))
+plt.title(f'Campo Elétrico (Ez) em t = {FinalTime}')
+
+# 3. Plota o campo (cmap='seismic' é ótimo para ondas: Azul negativo, Vermelho positivo)
+grafico = plt.tricontourf(x_plot, y_plot, Ez_plot, levels=100, cmap='seismic')
+plt.colorbar(grafico, label='Amplitude Ez')
+
+# (Opcional) Descomente a linha abaixo se quiser ver a malha de triângulos por cima do campo!
+# plt.plot(VX[EToV].T, VY[EToV].T, color='k', linewidth=0.5, alpha=0.3)
+
+# 4. Formatação
+plt.xlabel('x')
+plt.ylabel('y')
+plt.axis('equal') # Força o quadrado a não ficar esticado
+plt.tight_layout()
+
+# 5. Mostra na tela
+plt.show()

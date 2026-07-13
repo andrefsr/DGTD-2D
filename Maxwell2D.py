@@ -96,7 +96,8 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
     dtscale = setup.dtscale2D(malha.x, malha.y, malha.r, malha.s)
     
     # O passo de tempo básico
-    dt = np.min(dtscale) * rmin * (2.0/3.0)
+    CFL = 0.05
+    dt = CFL*np.min(dtscale) * rmin * (2.0/3.0)
     
     # 3. O Loop de Tempo Principal
     while time < FinalTime:
