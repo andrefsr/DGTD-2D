@@ -210,6 +210,3 @@ def Curl2D(ux, uy, uz, rx, sx, ry, sy, Dr, Ds):
         vy = -rx * uzr - sx * uzs
         
     return vx, vy, vz
-
-
-    

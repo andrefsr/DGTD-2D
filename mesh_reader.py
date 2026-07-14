@@ -7,7 +7,6 @@ def MeshReader2D(nome_arquivo):
     """
     with open(nome_arquivo, 'r') as f:
         linhas = f.readlines()
-
     VX_list = []
     VY_list = []
     EToV_list = []

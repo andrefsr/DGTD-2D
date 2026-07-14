@@ -2,6 +2,9 @@ import numpy as np
 import aux_func as aux
 import setup
 import operators2D as op2D
+import matplotlib.pyplot as plt
+import matplotlib.tri as mtri
+
 
 def MaxwellRhs2D(Hx, Hy, Ez, malha):
     '''Calcula o fluxo (lado direito) das equações de Maxwell 2D para o modo TM'''
@@ -81,6 +84,18 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
     ])
 
     time = 0.0
+    passo = 0 # Contador para sabermos quando atualizar a tela
+
+    # --- PREPARAÇÃO DA ANIMAÇÃO ---
+    plt.ion() # Liga o modo interativo do Matplotlib
+    fig, ax = plt.subplots(figsize=(8, 6))
+    
+    # DICA DE OURO: Criar a triangulação uma única vez antes do loop 
+    # economiza MUITO processamento!
+    x_flat = malha.x.flatten(order='F')
+    y_flat = malha.y.flatten(order='F')
+    triangulacao = mtri.Triangulation(x_flat, y_flat)
+    # ------------------------------
     
     # Registradores residuais do RK (só precisamos de um para cada variável)
     resHx = np.zeros((malha.Np, malha.K))
@@ -128,7 +143,29 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
             
         # Avança o relógio
         time += dt
-        print(f"Tempo atual: {time:.4e} / {FinalTime:.4e}") # Opcional: print para não ficar cego
+        passo += 1
+
+        # --- ATUALIZAÇÃO DA TELA (A cada 20 passos) ---
+        if passo % 20 == 0:
+            ax.clear() # Limpa o frame antigo
+            
+            Ez_flat = Ez.flatten(order='F')
+            
+            # vmin e vmax são cruciais para a escala de cores não ficar "piscando"
+            ax.tricontourf(triangulacao, Ez_flat, levels=50, cmap='seismic', vmin=-1.0, vmax=1.0)
+            
+            ax.set_title(f'Campo Ez - Tempo: {time:.4f}')
+            ax.set_aspect('equal')
+            ax.set_xlim([-1, 1])
+            ax.set_ylim([-1, 1])
+            
+            # Pausa minúscula para o Python ter tempo de desenhar na tela
+            plt.pause(0.001) 
+            
+    # --- FINALIZAÇÃO ---
+    plt.ioff() # Desliga o modo interativo quando acabar
+    plt.show() # Mantém a última tela aberta
+        #print(f"Tempo atual: {time:.4e} / {FinalTime:.4e}") # Opcional: print para não ficar cego
         
     return Hx, Hy, Ez
 

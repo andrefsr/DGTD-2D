@@ -180,5 +180,3 @@ def BuildMaps2D(x, y, Fmask, EToV, EToE, EToF, VX, VY, NODETOL=1e-10):
     vmapB = vmapM[mapB]
     
     return mapM, mapP, vmapM, vmapP, vmapB, mapB
-
-

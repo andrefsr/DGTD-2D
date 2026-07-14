@@ -100,12 +100,3 @@ def xytors(x,y):
     s = -L2 - L3 + L1
 
     return r, s
-
-
-
-
-
-
-
-
-

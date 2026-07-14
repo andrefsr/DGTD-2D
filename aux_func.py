@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.special import jacobi, gamma, roots_jacobi
 
-
 def JacobiP(x, alpha, beta, N):
     """
     Avalia os Polinômios de Jacobi Ortonormais de grau N 
