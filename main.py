@@ -26,13 +26,13 @@ J_geom = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 triangulos_invertidos = np.where(J_geom < 0)[0]
 
 if len(triangulos_invertidos) > 0:
-    print(f"⚠️ Corrigindo {len(triangulos_invertidos)} triângulos invertidos pelo Gmsh...")
+    #print(f"⚠️ Corrigindo {len(triangulos_invertidos)} triângulos invertidos pelo Gmsh...")
     # Para inverter o sentido, basta trocar os nós 2 e 3 de lugar!
     temp = EToV[triangulos_invertidos, 1].copy()
     EToV[triangulos_invertidos, 1] = EToV[triangulos_invertidos, 2]
     EToV[triangulos_invertidos, 2] = temp
-else:
-    print("✅ Todos os triângulos já estão no sentido correto.")
+#else:
+    #print("✅ Todos os triângulos já estão no sentido correto.")
 # =====================================================================
 
 malha = stp.StartUp2D(N,EToV,VX,VY)
@@ -42,8 +42,11 @@ Ez = np.sin(np.pi*malha.x)*np.sin(np.pi*malha.y)
 Hx = np.zeros((malha.Np,malha.K))
 Hy = np.zeros((malha.Np,malha.K))
 
-FinalTime = 1
+FinalTime = 10
 Hx, Hy, Ez = Max.Maxwell2D(Hx,Hy,Ez,FinalTime,malha)
+
+
+###########################################################################################################################
 
 
 # 1. Achata as matrizes para vetores 1D
