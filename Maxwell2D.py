@@ -5,8 +5,11 @@ import operators2D as op2D
 import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 
+mu0 = 4*np.pi*10**(-7)
+eps0 = 8.854*10**(-12)
+c0 = 1/np.sqrt(eps0*mu0)
 
-def MaxwellRhs2D(Hx, Hy, Ez, malha):
+def MaxwellRhs2D(Hx, Hy, Ez, malha,time):
     '''Calcula o fluxo (lado direito) das equações de Maxwell 2D para o modo TM'''
     
     # 1. Achata as matrizes em 1D (ordem Fortran) para os mapas de conectividade funcionarem
@@ -50,7 +53,9 @@ def MaxwellRhs2D(Hx, Hy, Ez, malha):
     rhsHx = -Ezy + malha.LIFT @ (malha.Fscale * fluxHx) / 2.0
     rhsHy =  Ezx + malha.LIFT @ (malha.Fscale * fluxHy) / 2.0
     rhsEz = CuHz + malha.LIFT @ (malha.Fscale * fluxEz) / 2.0
-    
+    f = 3
+    rhsEz += 2*np.pi*f*np.sin(2.0 * np.pi * f * time)*np.exp(-(malha.x**2 + malha.y**2) / 0.1**2)
+
     return rhsHx, rhsHy, rhsEz
 
 def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
@@ -114,6 +119,8 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
     CFL = 0.2
     dt = CFL*np.min(dtscale) * rmin * (2.0/3.0)
     
+    mask = np.where((malha.x == 0) & (malha.y == 0))
+
     # 3. O Loop de Tempo Principal
     while time < FinalTime:
         
@@ -126,10 +133,10 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
             
             # (Opcional) Se sua simulação tiver um pulso que depende do tempo, 
             # o tempo local de avaliação desse pulso seria:
-            # local_time = time + rk4c[INTRK] * dt
+            t_local = time + rk4c[INTRK] * dt
             
             # Chamada do RHS com todas as dependências corretas
-            rhsHx, rhsHy, rhsEz = MaxwellRhs2D(Hx, Hy, Ez, malha)
+            rhsHx, rhsHy, rhsEz = MaxwellRhs2D(Hx, Hy, Ez, malha,t_local)
             
             # Atualiza o residual
             resHx = rk4a[INTRK] * resHx + dt * rhsHx
@@ -140,7 +147,8 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
             Hx = Hx + rk4b[INTRK] * resHx
             Hy = Hy + rk4b[INTRK] * resHy
             Ez = Ez + rk4b[INTRK] * resEz
-            
+        
+            #Ez[mask] = np.exp(-((time - 1.8e-9*c0)**2  / (0.6e-9*c0)**2))
         # Avança o relógio
         time += dt
         passo += 1
@@ -150,11 +158,14 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
             ax.clear() # Limpa o frame antigo
             
             Ez_flat = Ez.flatten(order='F')
+
+            tfis_ns = (time/c0)*1e9
+
             
             # vmin e vmax são cruciais para a escala de cores não ficar "piscando"
             ax.tricontourf(triangulacao, Ez_flat, levels=50, cmap='seismic', vmin=-1.0, vmax=1.0)
             
-            ax.set_title(f'Campo Ez - Tempo: {time:.4f}')
+            ax.set_title(f'Campo Ez - Tempo: {tfis_ns:.4f} ns')
             ax.set_aspect('equal')
             ax.set_xlim([-1, 1])
             ax.set_ylim([-1, 1])
