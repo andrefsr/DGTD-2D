@@ -30,7 +30,7 @@ def MaxwellRhs2D(Hx, Hy, Ez, malha):
     dEz = dEz.reshape(shape_faces, order='F')
     
     # 5. Fluxos de Fronteira (Upwind)
-    alpha = 0.0
+    alpha = 1.0
     ndotdH = malha.nx * dHx + malha.ny * dHy
     
     fluxHx =  malha.ny * dEz + alpha * (ndotdH * malha.nx - dHx)
@@ -96,7 +96,7 @@ def Maxwell2D(Hx, Hy, Ez, FinalTime, malha):
     dtscale = setup.dtscale2D(malha.x, malha.y, malha.r, malha.s)
     
     # O passo de tempo básico
-    CFL = 0.05
+    CFL = 0.2
     dt = CFL*np.min(dtscale) * rmin * (2.0/3.0)
     
     # 3. O Loop de Tempo Principal
